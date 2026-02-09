@@ -108,12 +108,12 @@
                     <button class="btn btn-success btn-social-icon-text" onclick="window.print()">Print</button>
                 </div>
                 <div class="card-body">
-                    <div class="qr-grid">
+                    <div class="qr-grid" id="print-area">
                         @foreach($qrCodes as $qr)
                         @php
                         $categoryClass = strtolower($qr->categories->name ?? 'default');
                         @endphp
-                        <div class="qr-card {{ $categoryClass }}" id="print-area">
+                        <div class="qr-card {{ $categoryClass }}" >
                             <div class="title">
                                 {{ $qr->categories->name ?? 'QR CARD' }}
                             </div>
