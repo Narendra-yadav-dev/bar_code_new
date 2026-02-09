@@ -3,7 +3,8 @@
 @section('title', 'QR Code')
 
 @section('content')
-<style>
+<style> 
+   <style>
     body {
         font-family: Arial, sans-serif;
         background: #fff;
@@ -20,10 +21,12 @@
         padding: 14px;
         color: #fff;
         text-align: center;
-        height: 260px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        /* remove fixed height for print */
+        height: auto;
+        overflow: visible; /* ensure QR code is not cut */
     }
 
     .qr-card .title {
@@ -34,13 +37,17 @@
 
     .qr-card .qr-box {
         background: #fff;
-        padding: 10px;
+        padding: 2px;
         border-radius: 10px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     .qr-card .qr-box svg {
-        width: 120px;
-        height: 120px;
+        width: 100%;   /* make responsive */
+        height: auto;
+        max-width: 120px; /* keep max size */
     }
 
     .qr-card .footer {
@@ -49,45 +56,94 @@
     }
 
     /* 🎨 Category colors */
-    .bike {
-        background: #e74c3c;
-    }
-
-    /* red */
-    .car {
-        background: #2980b9;
-    }
-
-    /* blue */
-    .dogs {
-        background: #27ae60;
-    }
-
-    /* green */
-    .luggage {
-        background: #8e44ad;
-    }
-
-    /* purple */
+    .bike { background: #e74c3c; }
+    .car { background: #2980b9; }
+    .dogs { background: #27ae60; }
+    .luggage { background: #8e44ad; }
 
     @media print {
-        body * {
-        visibility: hidden;
-            }
 
-            #print-area,
-            #print-area * {
-                visibility: visible;
-            }
-
-            #print-area {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                border: 1px solid #000
-            }
+        /* A4 page setup */
+        @page {
+            size: A4;
+            margin: 10mm;
         }
+
+        body {
+            margin: 0;
+            background: #fff;
+        }
+
+        body * {
+            visibility: hidden;
+        }
+
+        #print-area,
+        #print-area * {
+            visibility: visible;
+        }
+
+        /* A4 grid: 3 × 3 */
+        #print-area {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            grid-auto-rows: auto;
+            gap: 10mm;
+        }
+
+        /* Card sizing */
+        .qr-card {
+            width: 100%;
+            height: 85mm; /* FIXED height for sticker */
+            border-radius: 14px;
+            padding: 10px;
+            text-align: center;
+            color: #fff;
+            page-break-inside: avoid;
+            break-inside: avoid;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .qr-card .title {
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            line-height: 1.2;
+        }
+
+        .qr-card .qr-box {
+            background: #fff;
+            padding: 6px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .qr-card .qr-box svg {
+            width: 120px;
+            height: 120px;
+        }
+
+        /* Force page break after every 9 cards */
+        .qr-card:nth-child(4n) {
+            page-break-after: always;
+        }
+
+        /* Category colors */
+        .bike { background: #e74c3c !important; }
+        .car { background: #2980b9 !important; }
+        .dogs { background: #27ae60 !important; }
+        .luggage { background: #8e44ad !important; }
+    }
+
+
+</style>
+
+
 </style>
 
 <div class="content-wrapper">
@@ -108,22 +164,24 @@
                     <button class="btn btn-success btn-social-icon-text" onclick="window.print()">Print</button>
                 </div>
                 <div class="card-body">
-                    <div class="qr-grid" id="print-area">
+                    <div id="print-area" class="qr-grid">
                         @foreach($qrCodes as $qr)
                         @php
                         $categoryClass = strtolower($qr->categories->name ?? 'default');
                         @endphp
-                        <div class="qr-card {{ $categoryClass }}" >
+                        <div class="qr-card {{ $categoryClass }}">
                             <div class="title">
-                                {{ $qr->categories->name ?? 'QR CARD' }}
+                                <p>{{ $qr->categories->name ?? 'QR CARD' }}</p>
+                                <p>Scan for Owner Details</p>
                             </div>
                             <div class="qr-box">
-                                {!! QrCode::generate(url('/scan/'.$qr->rock_id)) !!}
+                                {!! QrCode::size(120)->generate(url('/scan/'.$qr->rock_id)) !!}
                             </div>
                         </div>
                         @endforeach
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
